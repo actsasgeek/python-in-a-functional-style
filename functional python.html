@@ -12112,7 +12112,7 @@ div#notebook {
 <div class="text_cell_render border-box-sizing rendered_html">
 <div style="border: 1px solid black; padding: 10px 10px 10px 10px; margin-top: 10px;">
 <p><strong>Exercise</strong></p>
-<p>Look up a list of all of Python's operators.  You may find some surprises here and there. For example, <tt>&</tt> and <tt>and</tt> are not the same thing.</p>
+<p>Find a reference for all of Python's operators.  You may find some surprises here and there. For example, <tt>&</tt> and <tt>and</tt> are not the same thing.</p>
 </div>
 </div>
 </div>
@@ -15032,7 +15032,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="A-Note-about-Pure-Functions-and-Mutable-Data">A Note about Pure Functions and Mutable Data<a class="anchor-link" href="#A-Note-about-Pure-Functions-and-Mutable-Data">&#182;</a></h3><p>If data structures in Python were immutable, the following code would be true:</p>
+<h3 id="A-Note-about-Pure-Functions-and-Mutable-Data">A Note about Pure Functions and Mutable Data<a class="anchor-link" href="#A-Note-about-Pure-Functions-and-Mutable-Data">&#182;</a></h3><p>Consider the following code and its execution:</p>
 
 </div>
 </div>
@@ -15084,7 +15084,8 @@ x1 [1, 2, 3, 4, 10]
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Ideally, we would like for <code>x1</code> not to change. This is what happens in functional programming languages with immutable data structures. While it is possible to add immutable data structures with the very nice properties that such data structures have, a poor person's way to achieve something similar is through <code>deepcopy</code>:</p>
+<p>Ideally, we would like for <code>x1</code> not to change. This is what would happen in a functional programming language with <em>immutable</em> data structures. However, Python's data structures (except Tuples) are mutable which is the reason for the behavior we see.</p>
+<p>While it is possible to add <em>immutable</em> data structures and all the goodies that go with them to Python via 3rd party libraries (these are mentioned at the end of this document), a poor person's way to achieve something similar is through <code>deepcopy</code>:</p>
 
 </div>
 </div>
@@ -15153,7 +15154,6 @@ x1 [1, 2, 3, 4]
 <p>In either case, you need to be careful. If you do not make deep copies, at least make sure you always return the modified data structure rather than relying on the mutation in place (as Python normally does).</p>
 <p>If you decide to make deep copies, realize that you are doubling the amount of memory you are using. The efficient immutable data structures in Clojure and the like use <em>structural sharing</em> to minimize duplication. With structural sharing, <code>x1</code> and the modified <code>x2</code> "share" <code>[1, 2, 3, 4]</code> and only <code>x2</code> has <code>10</code> appended to the end.</p>
 <p>When it comes to writing certain maching learning algorithms, you will most definitely want to do deep copying...even if you were using OOP. In general, if you are very careful, always returning the modified data structure is the first easiest thing to do.</p>
-<p>At the end of this note, we will talk about external libraries that give immutable data structures to Python...transparently!</p>
 
 </div>
 </div>
@@ -15268,7 +15268,7 @@ x1 [1, 2, 3, 4]
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;__main__.Person instance at 0x10fe23ea8&gt;</pre>
+<pre>&lt;__main__.Person instance at 0x10d75ce60&gt;</pre>
 </div>
 
 </div>
@@ -16763,8 +16763,10 @@ for (int i = 0; i &lt; length( xs); i++) {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Whether you choose to use map, filter, reduce or List Comprehensions plus reduce is up to you. For myself, I tend to use map, filter and reduce to keep things consistent but there's no denying that List Comprehensions are prettier.</p>
-<p>Functional programming languages typically have a whole host of other higher order functions for operating on Lists. Some of them are irrelevant in Python. For example, <code>first</code> is just <code>xs[ 0]</code> and <code>rest</code> is just <code>xs[1:]</code>. <code>last</code> is <code>xs[-1]</code> and <code>butlast</code> is <code>xs[0:-1]</code>, <code>take</code> <em>n</em> is <code>xs[0:n]</code>, <code>drop</code> <em>n</em> is <code>xs[n:]</code>:</p>
+<h4 id="Recursion">Recursion<a class="anchor-link" href="#Recursion">&#182;</a></h4><p>Recursion is often a major part of functional programming. Unfortunately, it is not particularly emphasized in most OOP languages and so the runtimes for those languages often have limited support for recursion or are unable to optimize recursive calls. What is recursion?</p>
+<p>Recursion is when a function calls itself. This seems kind of daft. Why would a function call itself? It turns out that recursion is often a natural way of expressing certain kinds of computations especially computations that can be broken down into a sort of "perform some work and combine with previous work" approach.</p>
+<p>Let's look at an example. The function <code>map</code> takes a List and a function and applies the function to each element of the List, creating a new List in the process.</p>
+<p>We'll start with an <em>iterative</em> version:</p>
 
 </div>
 </div>
@@ -16772,6 +16774,154 @@ for (int i = 0; i &lt; length( xs); i++) {
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[134]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">my_iterative_map</span><span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">f</span><span class="p">(</span> <span class="n">x</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[135]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">times10</span><span class="p">(</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">10</span>
+
+<span class="k">print</span> <span class="n">my_iterative_map</span><span class="p">(</span> <span class="n">times10</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[10, 20, 30, 40, 50]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Easy enough. What would a recursive version look like?</p>
+<p>In Python, function overloading is not permitted (you cannot write functions with the same name but differ only in terms of numbers of arguments). Because of this, our actual recursive function will be defined and used inside the function called by the programmer:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[136]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">my_recursive_map</span><span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">recursive_map</span><span class="p">(</span> <span class="n">acc</span><span class="p">,</span> <span class="n">remainder</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span> <span class="n">remainder</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">acc</span>
+        <span class="n">acc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">f</span><span class="p">(</span> <span class="n">remainder</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="c1"># append does not return the caller.</span>
+        <span class="k">return</span> <span class="n">recursive_map</span><span class="p">(</span> <span class="n">acc</span><span class="p">,</span> <span class="n">remainder</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">return</span> <span class="n">recursive_map</span><span class="p">([],</span> <span class="n">xs</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[137]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span> <span class="n">my_recursive_map</span><span class="p">(</span> <span class="n">times10</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[10, 20, 30, 40, 50]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A recursive implementation is very much similar to an inductive proof. There is a <em>base case</em>...when there is no more work to be done and an <em>inductive step</em> when one step in the calculate is performed. Note that because the <code>recursive_map</code> function is defined inside the <code>my_recursive_map</code> function, the former is a closure over the value of <code>f</code> which need not be an argument to <code>recursive_map</code>.</p>
+<p>There are a number of ways in which recursion is a bit clumsier in Python:</p>
+<ol>
+<li>No function overloading or destructuring.</li>
+<li>Not everything is an expression.</li>
+</ol>
+<p>In many actual functional programming languages, the implementation would look something closer to this:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">my_recursive_map</span><span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">my_recursive_map</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="p">[])</span>
+
+<span class="k">def</span> <span class="nf">my_recursive_map</span><span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">acc</span><span class="p">):</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span> <span class="n">xs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">acc</span>
+  <span class="k">return</span> <span class="n">my_recursive_map</span><span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="n">xs</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">acc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">f</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</pre></div>
+<p>Recursion is a whole 'nother topic as they say. Any recursive algorithm can be re-written as an iterative algorithm and vice versa. Additionally, many such algorithms already conform to some well-known pattern such as <code>map</code>, <code>reduce</code> or <code>filter</code> so you are well advised to use one of those.</p>
+<p>However, that might not always be the case and there are some AI algorithms are are best and naturally written as either recursive or <em>co-recursive</em> functions (<code>f</code> calls <code>g</code> which calls <code>f</code>...etc). These include alpha-beta prunining in Adversarial Search as well as Decision Tree induction.</p>
+<p>Therefore you should at least be aware that Python has a recursion depth limit of 1000 by default. If we tried to run the <code>my_recursive_map</code> on a list that was more than 1000 elements long, we would get an exception. This can be fixed with the following code:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="mi">1500</span><span class="p">)</span>
+</pre></div>
+<p>or to whatever limit you require. You should not set it to be more than you need, however.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Whether you choose to use map, filter, reduce or List Comprehensions plus reduce is up to you. For myself, I tend to use map, filter and reduce to keep things consistent but there's no denying that List Comprehensions are prettier.</p>
+<p>You should never use recursion <em>first</em> but try to see if your calculation fits some existing transformational pattern. Then check to see if an iterative version is simpler. Finally, you may need to create a recursive version (although this is just advice for Python in a Functional Style...recursion is often easier than iteration in functional programming languages).</p>
+<p>Functional programming languages typically have a whole host of other higher order functions for operating on Lists. Some of them are irrelevant in Python. For example, <code>first</code> is just <code>xs[ 0]</code> and <code>rest</code> is just <code>xs[1:]</code>. <code>last</code> is <code>xs[-1]</code> and <code>butlast</code> is <code>xs[0:-1]</code>, <code>take</code> <em>n</em> is <code>xs[0:n]</code>, <code>drop</code> <em>n</em> is <code>xs[n:]</code>:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[138]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
@@ -16846,7 +16996,7 @@ drop( 2, xs) = [3, 4]
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[135]:</div>
+<div class="prompt input_prompt">In&nbsp;[139]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">compose</span><span class="p">(</span><span class="n">fs</span><span class="p">):</span>
@@ -16870,7 +17020,7 @@ drop( 2, xs) = [3, 4]
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[136]:</div>
+<div class="prompt input_prompt">In&nbsp;[140]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">compose</span><span class="p">([</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">5</span><span class="p">])</span>
@@ -16911,7 +17061,7 @@ drop( 2, xs) = [3, 4]
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[137]:</div>
+<div class="prompt input_prompt">In&nbsp;[141]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
@@ -16925,7 +17075,7 @@ drop( 2, xs) = [3, 4]
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[138]:</div>
+<div class="prompt input_prompt">In&nbsp;[142]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">add2</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span> <span class="n">add</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -16967,7 +17117,7 @@ drop( 2, xs) = [3, 4]
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[139]:</div>
+<div class="prompt input_prompt">In&nbsp;[143]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">addmul</span><span class="p">(</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
@@ -17025,7 +17175,7 @@ drop( 2, xs) = [3, 4]
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[140]:</div>
+<div class="prompt input_prompt">In&nbsp;[144]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span>
@@ -17062,25 +17212,25 @@ drop( 2, xs) = [3, 4]
 t= 1
 --
 --
---
+-
 
 t= 2
---
 ---
---
+---
+-
 
 t= 3
----
 ----
----
+----
+--
 
 t= 4
----
 -----
-----
+-----
+---
 
 t= 5
----
+-----
 ------
 ----
 </pre>
@@ -17103,7 +17253,7 @@ t= 5
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[141]:</div>
+<div class="prompt input_prompt">In&nbsp;[145]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">move_cars</span><span class="p">():</span>
@@ -17148,25 +17298,25 @@ t= 5
 t= 1
 --
 --
--
+--
 
 t= 2
 --
 ---
---
+---
 
 t= 3
----
+--
 ----
 ---
 
 t= 4
-----
+--
 -----
 ----
 
 t= 5
-----
+---
 -----
 -----
 </pre>
@@ -17182,7 +17332,7 @@ t= 5
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We can see a few differences here. We created functions with semantic meaning that did one job. The program is built by arranging these functions.</p>
+<p>We can see a few differences here. We created small functions with semantic meanings that did one job. This is the "DSL" for racing cars. The program is built by arranging these functions, essentially solving the problem in terms of the DSL.</p>
 <p>We're going to expand on this idea by solving a problem from <a href="https://uva.onlinejudge.org/index.php">Programming Challenge</a>. I much prefer the Programming Challenges problems to the pure mathematics problems often found for learning programming because the challenges often bear some resemblance to real life problems whereas the mathematical problems often require some domain knowledge (about primes, for example) and, to me at least, feel artificial.</p>
 <p>The problem we will attempt to solve is <a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=3&amp;page=show_problem&amp;problem=55">Challenge 119 - Greedy Gift Givers</a>.</p>
 
@@ -17227,34 +17377,45 @@ vick 141</code></pre>
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>There are a lot of ways to skin this beast but the basics include the following function outline:</p>
+<p>There are a lot of ways to skin this beast and our solution is probably going to be a bit over-architected in order to demonstrate a few concepts in functional programming and dataflows.</p>
+<p>In his presentation on <a href="https://www.youtube.com/watch?v=JaKLSH4csqE">Naming</a>, Zach Tellman notes that there are generally speaking only three operations:</p>
+<ol>
+<li>get data into the program.</li>
+<li>transform the data in the program.</li>
+<li>push data out of the program.</li>
+</ol>
+<p>And that except for top level functions that need to combine these operations, functions should only ever do, ideally, <em>one</em> of these three operations.</p>
+<p>Following this guidelines, we can break the problem into three basic functions:</p>
 <ul>
 <li><code>read_input()</code> - impure function that reads the string and translates/parses it into a data structure of some kind.</li>
 <li><code>calculate_net_gifts()</code> - a pure function that reads the data structure from above and outputs a new data structure with net gifting (or the same data structure with net gifting amounts).</li>
 <li><code>write_output()</code> - impure function that writes the net gifting amounts based on the data structure of net gifting.</li>
 </ul>
-<p>We can write and test these functions individually and then compose them into a <code>solve_problem</code> function that the end. We're going to take an somewhat overcomplicated approach so that you can get a taste of functional programming and dataflows.</p>
-<p>We want the <code>read_input</code> function to read the string with the raw data and output a Dict with the following format:</p>
+<p>We can write and test these functions individually and then compose them into a <code>solve_problem</code> function that the end.</p>
+<p>The main thing we want to decide now is what the <em>schema</em> of our data looks like and how we go from the raw data to data in the proper schema and from data in the proper schema into the expected output.</p>
+<p>The schema I've thought of looks like this:</p>
 <div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;dave&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;laura&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">]},</span>
  <span class="s2">&quot;owen&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;dave&quot;</span><span class="p">]},</span>
  <span class="s2">&quot;amr&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;vick&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">]},</span>
  <span class="s2">&quot;laura&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;amr&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">]},</span>
  <span class="s2">&quot;vick&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[]}}</span>
 </pre></div>
-<p>in the end, we want the data structure to be:</p>
+<p>So this is the data that <code>calculate_net_gifts</code> will start with and it's also the data that we want <code>read_input</code>  to to generate from the raw data.</p>
+<p>When we're done, the data structure will be:</p>
 <div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;dave&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;laura&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">],</span> <span class="s2">&quot;gift&quot;</span><span class="p">:</span> <span class="mi">66</span><span class="p">,</span> <span class="s2">&quot;given&quot;</span><span class="p">:</span> <span class="mi">198</span><span class="p">,</span> <span class="s2">&quot;received&quot;</span><span class="p">:</span> <span class="mi">502</span><span class="p">,</span> <span class="s2">&quot;net&quot;</span><span class="p">:</span> <span class="mi">304</span><span class="p">},</span>
  <span class="s2">&quot;owen&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;dave&quot;</span><span class="p">],</span> <span class="s2">&quot;gift&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;given&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;received&quot;</span><span class="p">:</span> <span class="mi">141</span><span class="p">,</span> <span class="s2">&quot;net&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">359</span><span class="p">},</span>
  <span class="s2">&quot;amr&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;vick&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">],</span> <span class="s2">&quot;gift&quot;</span><span class="p">:</span> <span class="mi">75</span><span class="p">,</span> <span class="s2">&quot;given&quot;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span> <span class="s2">&quot;received&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;net&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">150</span><span class="p">},</span>
  <span class="s2">&quot;laura&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;amr&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">],</span> <span class="s2">&quot;gift&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;given&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;received&quot;</span><span class="p">:</span> <span class="mi">66</span><span class="p">,</span> <span class="s2">&quot;net&quot;</span><span class="p">:</span> <span class="mi">66</span><span class="p">},</span>
  <span class="s2">&quot;vick&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;gift&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;given&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;received&quot;</span><span class="p">:</span> <span class="mi">141</span><span class="p">,</span> <span class="s2">&quot;net&quot;</span><span class="p">:</span> <span class="mi">141</span><span class="p">}}</span>
 </pre></div>
-<p>that is, we want <code>calculuate_net_giftin</code> to enrich the original data structure, step by step, so that we can test it along the way.</p>
-<p>The steps should be:</p>
+<p>that is, we want <code>calculate_net_gifts</code> to enrich the original data structure. We will break this down into steps so that we can test them, one by one, along the way. The steps should/could be:</p>
 <ol>
 <li>Calculate gift, given and starting received.</li>
 <li>Calculate received.</li>
 <li>Calculate net.</li>
 </ol>
+<p>Finally, the <code>write_output</code> function will take the final state of the data structure and write the expected output.</p>
+<p>We're going to write <code>calculate_net_gifts</code> first. This allows us to work with our chosen data schema and determine if there are any problems and changing it as necessary. We can also avoid IO in testing for the time being.</p>
 
 </div>
 </div>
@@ -17278,7 +17439,7 @@ vick 141</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[142]:</div>
+<div class="prompt input_prompt">In&nbsp;[146]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">dmap</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
@@ -17292,7 +17453,7 @@ vick 141</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[143]:</div>
+<div class="prompt input_prompt">In&nbsp;[147]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">dmap</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span> <span class="n">add</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
@@ -17306,7 +17467,7 @@ vick 141</code></pre>
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[143]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[147]:</div>
 
 
 <div class="output_text output_subarea output_execute_result">
@@ -17328,8 +17489,8 @@ vick 141</code></pre>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_all_gifts</span><span class="p">(</span> <span class="n">data</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">dmap</span><span class="p">(</span> <span class="n">calculate_gifts</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 </pre></div>
-<p>One of the problems with an <em>interpreted</em> language like Python, however, is that we need to define functions in a particular order. Specifically, we must define functions before they are called. This makes this <em>top/down</em> approach a bit difficult in Python.</p>
-<p>The alternative is to recognize we needed the <code>calculate_gifts</code> function and start there instead. This is the bottom/up approach. In either case, we are working declaratively...we are creating units of code that express what to do.</p>
+<p>One of the problems with an <em>interpreted</em> language like Python, however, is that we need to define functions in a particular order. Specifically, we must define functions before they are called. This makes this <em>top/down</em> approach a bit difficult in Python although you might use it when doing some initial pen and paper sketching.</p>
+<p>The alternative is to recognize we needed the <code>calculate_gifts</code> function and start there instead. This is the <em>bottom/up</em> approach. In either case, we are working declaratively...we are creating units of code that express what to do.</p>
 <p>That function will take a person's Dict and calculate an integer gift value, the total amount given away and the remainder as the initial value for received:</p>
 
 </div>
@@ -17337,7 +17498,7 @@ vick 141</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[144]:</div>
+<div class="prompt input_prompt">In&nbsp;[148]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">calculate_gifts</span><span class="p">(</span> <span class="n">person_data</span><span class="p">):</span>
@@ -17365,7 +17526,7 @@ vick 141</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[145]:</div>
+<div class="prompt input_prompt">In&nbsp;[149]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span> <span class="n">calculate_gifts</span><span class="p">(</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;laura&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">]})</span>
@@ -17402,7 +17563,7 @@ vick 141</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[146]:</div>
+<div class="prompt input_prompt">In&nbsp;[150]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">calculate_all_gifts</span><span class="p">(</span> <span class="n">data</span><span class="p">):</span>
@@ -17416,7 +17577,7 @@ vick 141</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[147]:</div>
+<div class="prompt input_prompt">In&nbsp;[151]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span> <span class="n">calculate_all_gifts</span><span class="p">(</span> <span class="p">{</span><span class="s2">&quot;dave&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;laura&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">]},</span>
@@ -17458,7 +17619,7 @@ vick 141</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[148]:</div>
+<div class="prompt input_prompt">In&nbsp;[152]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">distribute_gifts</span><span class="p">(</span> <span class="n">data</span><span class="p">,</span> <span class="n">person</span><span class="p">):</span>
@@ -17484,7 +17645,7 @@ vick 141</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[149]:</div>
+<div class="prompt input_prompt">In&nbsp;[153]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">calculate_all_gifts</span><span class="p">(</span> <span class="p">{</span><span class="s2">&quot;dave&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;laura&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">]},</span>
@@ -17531,7 +17692,7 @@ vick {&#39;fund&#39;: 0, &#39;given&#39;: 0, &#39;gift&#39;: 0, &#39;recipients&
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[150]:</div>
+<div class="prompt input_prompt">In&nbsp;[154]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">distribute_all_gifts</span><span class="p">(</span> <span class="n">data</span><span class="p">):</span>
@@ -17558,7 +17719,7 @@ vick {&#39;fund&#39;: 0, &#39;given&#39;: 0, &#39;gift&#39;: 0, &#39;recipients&
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[151]:</div>
+<div class="prompt input_prompt">In&nbsp;[155]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">calculate_all_gifts</span><span class="p">(</span> <span class="p">{</span><span class="s2">&quot;dave&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;laura&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">]},</span>
@@ -17608,7 +17769,7 @@ amr {&#39;fund&#39;: 150, &#39;given&#39;: 150, &#39;gift&#39;: 75, &#39;recipie
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[152]:</div>
+<div class="prompt input_prompt">In&nbsp;[156]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">calculate_net_gifting</span><span class="p">(</span> <span class="n">person</span><span class="p">):</span>
@@ -17623,7 +17784,7 @@ amr {&#39;fund&#39;: 150, &#39;given&#39;: 150, &#39;gift&#39;: 75, &#39;recipie
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[153]:</div>
+<div class="prompt input_prompt">In&nbsp;[157]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">calculate_all_net_gifting</span><span class="p">(</span> <span class="n">data</span><span class="p">):</span>
@@ -17637,7 +17798,7 @@ amr {&#39;fund&#39;: 150, &#39;given&#39;: 150, &#39;gift&#39;: 75, &#39;recipie
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[154]:</div>
+<div class="prompt input_prompt">In&nbsp;[158]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">calculate_all_gifts</span><span class="p">(</span> <span class="p">{</span><span class="s2">&quot;dave&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;laura&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">]},</span>
@@ -17689,7 +17850,7 @@ amr {&#39;received&#39;: 0, &#39;given&#39;: 150, &#39;recipients&#39;: [&#39;vi
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[155]:</div>
+<div class="prompt input_prompt">In&nbsp;[159]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">calculate_net_gifts</span><span class="p">(</span> <span class="n">data</span><span class="p">):</span>
@@ -17706,7 +17867,7 @@ amr {&#39;received&#39;: 0, &#39;given&#39;: 150, &#39;recipients&#39;: [&#39;vi
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[156]:</div>
+<div class="prompt input_prompt">In&nbsp;[160]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">calculate_net_gifts</span><span class="p">(</span> <span class="p">{</span><span class="s2">&quot;dave&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;laura&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">]},</span>
@@ -17754,7 +17915,7 @@ amr {&#39;received&#39;: 0, &#39;given&#39;: 150, &#39;recipients&#39;: [&#39;vi
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[157]:</div>
+<div class="prompt input_prompt">In&nbsp;[161]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">calculate_net_gifts</span> <span class="o">=</span> <span class="n">compose</span><span class="p">([</span><span class="n">calculate_all_gifts</span><span class="p">,</span> <span class="n">distribute_all_gifts</span><span class="p">,</span> <span class="n">calculate_all_net_gifting</span><span class="p">])</span>
@@ -17767,7 +17928,7 @@ amr {&#39;received&#39;: 0, &#39;given&#39;: 150, &#39;recipients&#39;: [&#39;vi
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[158]:</div>
+<div class="prompt input_prompt">In&nbsp;[162]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">calculate_net_gifts</span><span class="p">(</span> <span class="p">{</span><span class="s2">&quot;dave&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;laura&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">]},</span>
@@ -17816,7 +17977,7 @@ amr {&#39;received&#39;: 0, &#39;given&#39;: 150, &#39;recipients&#39;: [&#39;vi
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[159]:</div>
+<div class="prompt input_prompt">In&nbsp;[163]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">write_output</span><span class="p">(</span> <span class="n">data</span><span class="p">):</span>
@@ -17834,7 +17995,7 @@ amr {&#39;received&#39;: 0, &#39;given&#39;: 150, &#39;recipients&#39;: [&#39;vi
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[160]:</div>
+<div class="prompt input_prompt">In&nbsp;[164]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">calculate_net_gifts</span><span class="p">(</span> <span class="p">{</span><span class="s2">&quot;dave&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fund&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;laura&quot;</span><span class="p">,</span> <span class="s2">&quot;owen&quot;</span><span class="p">,</span> <span class="s2">&quot;vick&quot;</span><span class="p">]},</span>
@@ -17899,7 +18060,7 @@ vick 0 0</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[161]:</div>
+<div class="prompt input_prompt">In&nbsp;[165]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">NAME</span> <span class="o">=</span> <span class="mi">0</span>
@@ -17922,7 +18083,7 @@ vick 0 0</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[162]:</div>
+<div class="prompt input_prompt">In&nbsp;[166]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span> <span class="n">read_person_data</span><span class="p">(</span> <span class="s2">&quot;dave 200 3 laura owen vick&quot;</span><span class="p">)</span>
@@ -17963,7 +18124,7 @@ vick 0 0</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[163]:</div>
+<div class="prompt input_prompt">In&nbsp;[167]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">read_input</span><span class="p">(</span> <span class="n">raw_data</span><span class="p">):</span>
@@ -17979,7 +18140,7 @@ vick 0 0</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[164]:</div>
+<div class="prompt input_prompt">In&nbsp;[168]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># &quot;&quot;&quot; is used for multiline strings in Python</span>
@@ -18026,7 +18187,7 @@ vick 0 0</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[165]:</div>
+<div class="prompt input_prompt">In&nbsp;[169]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">solve</span><span class="p">(</span> <span class="n">raw_data</span><span class="p">):</span>
@@ -18042,7 +18203,7 @@ vick 0 0</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[166]:</div>
+<div class="prompt input_prompt">In&nbsp;[170]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">raw_data</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;5</span>
@@ -18091,7 +18252,7 @@ vick 141
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[167]:</div>
+<div class="prompt input_prompt">In&nbsp;[171]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">raw_data</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;3</span>
@@ -18144,7 +18305,7 @@ steve -23
 <li>reading and writing text files including CSV and TSV.</li>
 <li>various "pickling" and "unpickling" approaches including the binary format for Python and JSON.</li>
 <li>string functions including formatting</li>
-<li>console input and output</li>
+<li>console/terminal input and output</li>
 <li>regular expressions</li>
 <li>general functions and methods for Lists, Dicts, Sets, Tuples.</li>
 <li>random number generation including setting the generator <em>seed</em></li>
